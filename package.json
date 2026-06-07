@@ -1,0 +1,85 @@
+{
+  "name": "claude-notifier",
+  "displayName": "Claude Code Notifier",
+  "description": "Plays a sound when Claude Code pauses and waits for your input",
+  "version": "0.1.0",
+  "publisher": "jackandy338",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jackandy338/claude-notifier"
+  },
+  "engines": {
+    "vscode": "^1.120.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeNotifier.selectSound",
+        "title": "Claude Notifier: Select Sound File"
+      },
+      {
+        "command": "claudeNotifier.testSound",
+        "title": "Claude Notifier: Test Sound"
+      },
+      {
+        "command": "claudeNotifier.toggle",
+        "title": "Claude Notifier: Toggle On/Off"
+      },
+      {
+        "command": "claudeNotifier.openSettings",
+        "title": "Claude Notifier: Open Settings"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Notifier",
+      "properties": {
+        "claudeNotifier.soundPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to custom sound file (mp3, wav, ogg, m4a)"
+        },
+        "claudeNotifier.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable sound notifications"
+        },
+        "claudeNotifier.volume": {
+          "type": "number",
+          "default": 0.8,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Playback volume (0.0 – 1.0)"
+        },
+        "claudeNotifier.cooldownMs": {
+          "type": "number",
+          "default": 3000,
+          "description": "Minimum milliseconds between consecutive sounds (prevents spamming)"
+        },
+        "claudeNotifier.alsoNotify": {
+          "type": "boolean",
+          "default": true,
+          "description": "Also show a VS Code notification badge when Claude Code is waiting"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.120.0",
+    "@vscode/vsce": "^3.9.2",
+    "typescript": "^5.3.0"
+  }
+}
