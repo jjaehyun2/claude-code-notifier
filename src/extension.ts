@@ -13,8 +13,7 @@ const TRIGGER_FILE = path.join(os.homedir(), '.claude', 'notifier-trigger');
 // is called — before the dialog is displayed to the user.
 
 class SentinelWatcher {
-  private timer: ReturnType<typeof setInterval> | undefined;
-  private lastMtime = 0;
+  private watcher: vscode.FileSystemWatcher | undefined;
   private onTrigger: () => void;
   private out: vscode.OutputChannel;
 
@@ -24,29 +23,24 @@ class SentinelWatcher {
   }
 
   start(): void {
-    // Record current mtime so we only react to future writes
-    try {
-      this.lastMtime = fs.statSync(TRIGGER_FILE).mtimeMs;
-    } catch (_) {
-      this.lastMtime = 0;
-    }
+    const pattern = new vscode.RelativePattern(
+      vscode.Uri.file(path.dirname(TRIGGER_FILE)),
+      path.basename(TRIGGER_FILE)
+    );
+    this.watcher = vscode.workspace.createFileSystemWatcher(pattern, false, false, true);
 
-    this.timer = setInterval(() => {
-      try {
-        const mtime = fs.statSync(TRIGGER_FILE).mtimeMs;
-        if (mtime > this.lastMtime) {
-          this.lastMtime = mtime;
-          this.out.appendLine('[Notifier] Sentinel file touched — triggering sound');
-          this.onTrigger();
-        }
-      } catch (_) { /* file not created yet */ }
-    }, 150);
+    const handler = () => {
+      this.out.appendLine('[Notifier] Sentinel file touched — triggering sound');
+      this.onTrigger();
+    };
+    this.watcher.onDidCreate(handler);
+    this.watcher.onDidChange(handler);
 
     this.out.appendLine(`[Notifier] Watching sentinel file: ${TRIGGER_FILE}`);
   }
 
   dispose(): void {
-    if (this.timer) { clearInterval(this.timer); }
+    this.watcher?.dispose();
   }
 }
 
